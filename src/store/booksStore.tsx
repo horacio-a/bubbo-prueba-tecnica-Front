@@ -28,6 +28,8 @@ interface orderType {
   CreateBook: any;
 }
 
+const api = 'https://9q7ztzg6-3000.brs.devtunnels.ms/books'
+
 const useStore = create<orderType>()(
   subscribeWithSelector((set, get) => ({
     books: [],
@@ -36,21 +38,23 @@ const useStore = create<orderType>()(
 
     fetchAllData: async () => {
       const result = await axios.get(
-        `https://m8jpxv3s-3000.brs.devtunnels.ms/books`,
+        api,
       );
       set(() => ({books: result.data}));
     },
 
     fetchDataById: async (id: string) => {
       const result = await axios.get(
-        `https://m8jpxv3s-3000.brs.devtunnels.ms/books/${id}`,
+        `${api}/${id}`,
       );
       set(() => ({booksById: result.data}));
     },
 
     deleteBook: async (id: any) => {
+      set({loading: true});
+
       const result = await axios.delete(
-        `https://m8jpxv3s-3000.brs.devtunnels.ms/books/${id.id}`,
+        `${api}/${id.id}`,
       );
       console.log(result);
       const {books} = get();
@@ -58,12 +62,14 @@ const useStore = create<orderType>()(
       const newbooks = copiaObjeto.filter(books => books.id != id.id);
 
       set({books: newbooks});
+      set({loading: false});
+
     },
 
     updateBook: async (id: any, data: any) => {
       set({loading: true});
       const result = await axios.put(
-        `https://m8jpxv3s-3000.brs.devtunnels.ms/books/${id}`,
+        `${api}/${id}`,
         data,
       );
       set(() => ({booksById: result.data}));
@@ -76,15 +82,20 @@ const useStore = create<orderType>()(
       set({loading: false});
     },
     CreateBook: async (data: BooksType) => {
+      set({loading: true});
+
       const result = await axios.post(
-        `https://m8jpxv3s-3000.brs.devtunnels.ms/books`,
+        `${api}`,
         data,
       );
-      console.log(result);
+      console.log(result.data);
       const {books} = get();
       const copiaObjeto = [...books];
       copiaObjeto.push(result.data);
-      set(() => ({books: result.data}));
+      console.log(copiaObjeto)
+      set(() => ({books: copiaObjeto}));
+      set({loading: false});
+
     },
   })),
 );
