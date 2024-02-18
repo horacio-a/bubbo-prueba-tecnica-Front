@@ -19,6 +19,7 @@ import DocumentPicker from 'react-native-document-picker';
 
 import useStore from '../store/booksStore';
 import axios from 'axios';
+import {Asset, launchImageLibrary} from 'react-native-image-picker';
 
 function Edit({navigation}: any): React.JSX.Element {
   const [uploading, setUploading] = useState(false);
@@ -37,24 +38,27 @@ function Edit({navigation}: any): React.JSX.Element {
   const [descripcion, onChangedescripcion] = useState(booksById.descripcion);
   const [cita, onChangecita] = useState(booksById.cita);
 
-  //   const docPicker = async () => {
-  //     // Pick a single file
-  //     try {
-  //       const res = await DocumentPicker.pick({
-  //         type: [DocumentPicker.types.allFiles],
-  //       });
-  //       console.log(res);
+  const [Image, setImage] = useState<Asset>();
 
-  //       setImage(res);
-  //     } catch (err) {
-  //       if (DocumentPicker.isCancel(err)) {
-  //         console.log('error -----', err);
-  //       } else {
-  //         throw err;
-  //       }
-  //     }
-  //   };
+  const openImagePicker = async () => {
+    const result = await launchImageLibrary({
+      mediaType: 'photo',
+      includeBase64: false,
+      maxHeight: 2000,
+      maxWidth: 2000,
+    });
 
+    if (result.didCancel) {
+      console.log('User cancelled image picker');
+    } else if (result.errorCode) {
+      console.log('Image picker error: ', result.errorMessage);
+    } else {
+      const firstAsset = result.assets?.[0];
+      if (firstAsset) {
+        setImage(firstAsset);
+      }
+    }
+  };
   const update = () => {
     const data = {
       titulo: Title,
@@ -68,7 +72,7 @@ function Edit({navigation}: any): React.JSX.Element {
       cita: cita,
     };
 
-    updateBook(booksById.id, data);
+    updateBook(booksById.id, data, Image);
   };
   useEffect(() => {
     useStore.subscribe(
@@ -101,12 +105,21 @@ function Edit({navigation}: any): React.JSX.Element {
             height: '100%',
             justifyContent: 'space-around',
           }}>
-          <Button
-            title="gasd"
-            onPress={() => {
-              // docPicker();
+          <TouchableOpacity
+            style={{
+              ...styles.inputxl,
+              height: '7.5%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginTop: 25,
+              backgroundColor: '#000',
             }}
-          />
+            onPress={openImagePicker}>
+            <Text style={{color: '#fff'}}>
+              {Image ? Image.fileName : 'Cambiar la imagen'}
+            </Text>
+          </TouchableOpacity>
           <TextInput
             placeholder="Titulo"
             onChangeText={onChangeTitle}

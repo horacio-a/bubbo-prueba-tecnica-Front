@@ -15,7 +15,7 @@ import {
   Image,
 } from 'react-native';
 import useStore from '../store/booksStore';
-
+import storage from '@react-native-firebase/storage';
 interface Types {
   index: number;
   navigation: any;
@@ -27,6 +27,7 @@ export default function CarouselCard({
 }: Types): React.JSX.Element {
   const {books} = useStore(state => state);
   const [open, setOpen] = useState(false);
+
   return (
     <View
       style={{

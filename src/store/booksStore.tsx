@@ -2,6 +2,8 @@ import axios from 'axios';
 import {get} from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 import {create} from 'zustand';
 import {subscribeWithSelector} from 'zustand/middleware';
+import storage from '@react-native-firebase/storage';
+const reference = storage();
 
 export interface BooksType {
   id: string;
@@ -17,63 +19,63 @@ export interface BooksType {
   cita: string;
 }
 
-interface orderType {
+interface StoreType {
   loading: boolean;
   books: BooksType[];
   fetchAllData: () => Promise<void>;
   deleteBook: any;
   booksById: any;
   fetchDataById: any;
-  updateBook: (id: any, data: any) => Promise<void>;
+  updateBook: (id: any, data: any, Image: any) => Promise<void>;
   CreateBook: any;
 }
 
-const api = 'https://9q7ztzg6-3000.brs.devtunnels.ms/books'
+const api = 'https://bubbo-backend.vercel.app/books';
 
-const useStore = create<orderType>()(
+const useStore = create<StoreType>()(
   subscribeWithSelector((set, get) => ({
     books: [],
     booksById: {},
     loading: false,
 
     fetchAllData: async () => {
-      const result = await axios.get(
-        api,
-      );
+      set({loading: true});
+
+      const result = await axios.get(api);
       set(() => ({books: result.data}));
+      set({loading: false});
     },
 
     fetchDataById: async (id: string) => {
-      const result = await axios.get(
-        `${api}/${id}`,
-      );
+      const result = await axios.get(`${api}/${id}`);
+      try {
+        const url = await storage().ref(result.data.id).getDownloadURL();
+        result.data.img = url;
+      } catch (error) {}
+
       set(() => ({booksById: result.data}));
     },
 
     deleteBook: async (id: any) => {
-      set({loading: true});
-
-      const result = await axios.delete(
-        `${api}/${id.id}`,
-      );
-      console.log(result);
+      const result = await axios.delete(`${api}/${id.id}`);
       const {books} = get();
       const copiaObjeto = [...books];
       const newbooks = copiaObjeto.filter(books => books.id != id.id);
 
       set({books: newbooks});
-      set({loading: false});
-
     },
 
-    updateBook: async (id: any, data: any) => {
+    updateBook: async (id: any, data: any, Image: any) => {
       set({loading: true});
-      const result = await axios.put(
-        `${api}/${id}`,
-        data,
-      );
+      await reference.ref(data.titulo).putFile(Image.uri);
+      let url = await storage().ref(data.titulo).getDownloadURL();
+      data.img = url;
+
+      const result = await axios.put(`${api}/${id}`, data);
       set(() => ({booksById: result.data}));
+
       const {books} = get();
+
       const copiaObjeto = [...books];
       const newbooks = copiaObjeto.findIndex(books => books.id === id);
       copiaObjeto[newbooks] = result.data;
@@ -81,21 +83,22 @@ const useStore = create<orderType>()(
       set({books: copiaObjeto});
       set({loading: false});
     },
-    CreateBook: async (data: BooksType) => {
+    CreateBook: async (data: BooksType, Image: any) => {
       set({loading: true});
 
-      const result = await axios.post(
-        `${api}`,
-        data,
-      );
-      console.log(result.data);
       const {books} = get();
+      await reference.ref(data.titulo).putFile(Image.uri);
+      let url = await storage().ref(data.titulo).getDownloadURL();
+      data.img = url;
+      const result = await axios.post(`${api}`, data);
+      set(() => ({booksById: result.data}));
+
       const copiaObjeto = [...books];
       copiaObjeto.push(result.data);
-      console.log(copiaObjeto)
-      set(() => ({books: copiaObjeto}));
-      set({loading: false});
 
+      set(() => ({books: copiaObjeto}));
+
+      set({loading: false});
     },
   })),
 );

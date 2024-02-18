@@ -29,12 +29,10 @@ interface carouselIndex {
 }
 
 function Home({navigation}: any): React.JSX.Element {
-  const [Loding, setLoding] = useState<boolean>(true);
-  const {books, fetchAllData} = useStore(state => state);
+  const {books, fetchAllData, loading} = useStore(state => state);
 
   useEffect(() => {
     fetchAllData();
-    setLoding(false);
   }, []);
 
   const ref = React.useRef<ICarouselInstance>(null);
@@ -79,8 +77,16 @@ function Home({navigation}: any): React.JSX.Element {
           </Text>
         </TouchableOpacity>
       </View>
-      {Loding ? (
-        <></>
+      {loading ? (
+        <View
+          style={{
+            width: '100%',
+            height: '70%',
+            display: 'flex',
+            alignItems: 'center',
+          }}>
+          <Text>loading...</Text>
+        </View>
       ) : (
         <>
           {books[0] === undefined ? (

@@ -19,15 +19,8 @@ function SingleBook({route, navigation}: any): React.JSX.Element {
   const {booksById, fetchDataById} = useStore(state => state);
   const {id} = route.params;
 
-  const [colors, setColors] = React.useState(null);
-
-  const NavigationFuntion = () => {
-    navigation.navigate('Home');
-  };
-
   useEffect(() => {
     setLoding(true);
-
     fetchDataById(id);
     setLoding(false);
   }, []);
@@ -161,7 +154,9 @@ function SingleBook({route, navigation}: any): React.JSX.Element {
             </View>
           </View>
         ) : (
-          <></>
+          <View>
+            <Text>...loading</Text>
+          </View>
         )}
       </View>
       <PopUpDelete show={show} setshow={setshow} navigation={navigation} />

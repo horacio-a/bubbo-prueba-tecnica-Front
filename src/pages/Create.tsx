@@ -15,10 +15,9 @@ import {
   Image,
   TextInput,
 } from 'react-native';
-import DocumentPicker from 'react-native-document-picker';
-
 import useStore from '../store/booksStore';
 import axios from 'axios';
+import {Asset, launchImageLibrary} from 'react-native-image-picker';
 
 function Create({navigation}: any): React.JSX.Element {
   const [uploading, setuploading] = useState(false);
@@ -32,6 +31,27 @@ function Create({navigation}: any): React.JSX.Element {
   const [valoracion, onChangevaloracion] = useState('');
   const [descripcion, onChangedescripcion] = useState('');
   const [cita, onChangecita] = useState('');
+  const [Image, setImage] = useState<Asset>();
+
+  const openImagePicker = async () => {
+    const result = await launchImageLibrary({
+      mediaType: 'photo',
+      includeBase64: false,
+      maxHeight: 2000,
+      maxWidth: 2000,
+    });
+
+    if (result.didCancel) {
+      console.log('User cancelled image picker');
+    } else if (result.errorCode) {
+      console.log('Image picker error: ', result.errorMessage);
+    } else {
+      const firstAsset = result.assets?.[0];
+      if (firstAsset) {
+        setImage(firstAsset);
+      }
+    }
+  };
 
   const Create = () => {
     const data = {
@@ -46,18 +66,17 @@ function Create({navigation}: any): React.JSX.Element {
       cita: cita,
     };
 
-    CreateBook(data);
+    CreateBook(data, Image);
   };
   useEffect(() => {
     useStore.subscribe(
-      state => state.loading,
-      loading => {
-        if (!loading) {
-          navigation.navigate('SingleBook', {id: booksById.id});
-        }
+      state => state.booksById,
+      booksById => {
+        navigation.navigate('SingleBook', {id: booksById.id});
       },
     );
   }, []);
+
   return (
     <>
       <ScrollView>
@@ -79,12 +98,22 @@ function Create({navigation}: any): React.JSX.Element {
             height: '100%',
             justifyContent: 'space-around',
           }}>
-          <Button
-            title="gasd"
-            onPress={() => {
-              // docPicker();
+          <TouchableOpacity
+            style={{
+              ...styles.inputxl,
+              height: '7.5%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginTop: 25,
+              backgroundColor: '#000',
             }}
-          />
+            onPress={openImagePicker}>
+            <Text style={{color: '#fff'}}>
+              {Image ? Image.fileName : 'Ingrese una imagen'}
+            </Text>
+          </TouchableOpacity>
+
           <TextInput
             placeholder="Titulo"
             onChangeText={onChangeTitle}
@@ -169,7 +198,6 @@ function Create({navigation}: any): React.JSX.Element {
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
-                console.log('hola');
                 Create();
               }}
               style={{

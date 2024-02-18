@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "754415142953",
+    "project_id": "images-bubbo",
+    "storage_bucket": "images-bubbo.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:754415142953:android:41f0b628f18a78e3277438",
+        "android_client_info": {
+          "package_name": "com.bubbofrontend"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBf7N_xWwgmxNkI0UXXXQ9kwyCpN3L78BQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
